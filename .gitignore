@@ -1,0 +1,4 @@
+node_modules/
+vendor/
+postgres/data/
+laravel/app/vendor/

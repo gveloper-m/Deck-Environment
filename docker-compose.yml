@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+      - ./postgres/initdb:/docker-entrypoint-initdb.d
+    ports:
+      - "55432:5432" # changed host port to avoid conflict
+
+  mariadb:
+    image: mariadb:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: wp_db
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: wp_pass
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  laravel:
+    build:
+      context: ./laravel/docker
+    volumes:
+      - ./laravel_app:/var/www/html
+      - ./laravel_app/.env:/var/www/html/.env
+    depends_on:
+      - postgres
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: laravel_db
+      DB_USERNAME: laravel_user
+      DB_PASSWORD: laravel_pass
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "mkdir -p /var/www/html &&
+             chmod 777 /var/www/html &&
+             php artisan serve --host=0.0.0.0 --port=8000"
+
+  wordpress:
+    image: wordpress:latest
+    environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_NAME: wp_db
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: wp_pass
+    volumes:
+      - ./wordpress_app:/var/www/html
+    depends_on:
+      - mariadb
+    ports:
+      - "8080:80"
+    command: >
+      sh -c "mkdir -p /var/www/html &&
+             chmod 777 /var/www/html &&
+             docker-entrypoint.sh apache2-foreground"
+
+  web:
+    build:
+      context: ./web
+    volumes:
+      - ./web:/usr/share/nginx/html
+      - ./laravel_app:/var/www/html
+      - ./laravel_app/.env:/var/www/html/.env
+
+    ports:
+      - "8081:80"
