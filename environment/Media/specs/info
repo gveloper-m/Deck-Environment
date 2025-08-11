@@ -1,0 +1,15 @@
+-register
+    name
+    mail
+    phone
+    password
+
+-login
+    name/mail
+    password
+
+-custom fields
+    adds custom field name to array in controller and then it accepts it, and saves it in table
+
+
+-logs/registers->goes to profile
