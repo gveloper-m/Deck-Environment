@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomFieldController;
+use App\Http\Controllers\MeetingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,4 +48,34 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     // Route::get('/admin/dashboard', function () {
     //     return 'Welcome Admin!';
     // });
+});
+
+/*
+|--------------------------------------------------------------------------
+| User routes (must be logged in)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/meetings', [MeetingController::class, 'store']);
+    Route::get('/my-meetings', [MeetingController::class, 'myMeetings']);
+    Route::get('/my-meetings/past', [MeetingController::class, 'myPastMeetings']);
+    Route::get('/my-meetings/future', [MeetingController::class, 'myFutureMeetings']);
+    Route::put('/edit-meeting/{id}', [MeetingController::class, 'update']);
+    Route::delete('/delete-meeting/{id}', [MeetingController::class, 'destroy']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Admin routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::get('/admin/meetings', [MeetingController::class, 'adminAllMeetings']);
+    Route::get('/admin/meetings/user/{userId}', [MeetingController::class, 'adminMeetingsByUser']);
+    Route::get('/admin/meetings/past', [MeetingController::class, 'adminPastMeetings']);
+    Route::get('/admin/meetings/future', [MeetingController::class, 'adminFutureMeetings']);
+    Route::put('/admin/edit-meeting/{id}', [MeetingController::class, 'adminUpdateMeeting']);
+    Route::delete('/admin/delete-meeting/{id}', [MeetingController::class, 'adminDeleteMeeting']);
 });
