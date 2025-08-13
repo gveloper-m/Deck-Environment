@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PayPalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,3 +81,19 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::put('/admin/edit-meeting/{id}', [MeetingController::class, 'adminUpdateMeeting']);
     Route::delete('/admin/delete-meeting/{id}', [MeetingController::class, 'adminDeleteMeeting']);
 });
+
+// Admin routes
+ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::get('/payments', [PaymentController::class, 'index']);
+});
+
+// User routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/my-payments', [PaymentController::class, 'myPayments']);
+    Route::post('/payments', [PaymentController::class, 'store']);
+});
+
+
+Route::post('/paypal/create-order', [PayPalController::class, 'createOrder']);
+Route::get('/paypal/success', [PayPalController::class, 'success'])->name('paypal.success');
+Route::get('/paypal/cancel', [PayPalController::class, 'cancel'])->name('paypal.cancel');
